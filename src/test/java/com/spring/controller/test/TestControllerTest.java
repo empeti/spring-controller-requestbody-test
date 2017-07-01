@@ -24,17 +24,22 @@ public class TestControllerTest {
 	private TestController underTest;
 	private ControllerRequest request;
 	private String requestJson;
+	private String emptyNameRequestJson;
 	
 	@Before
 	public void init(){
 		underTest = new TestController();
 		mockMvc = MockMvcBuilders.standaloneSetup(underTest).build();
 		
+		Gson gson = new Gson();
+		
 		request = new ControllerRequest();
-		request.setName("name");
 		request.setEmail("user@server.com");
 		
-		Gson gson = new Gson();
+		emptyNameRequestJson = gson.toJson(request);
+
+		request.setName("name");
+		
 		requestJson = gson.toJson(request);
 	}
 	
@@ -43,5 +48,12 @@ public class TestControllerTest {
 		mockMvc.perform(post("/test")
 				.contentType(MediaType.APPLICATION_JSON).content(requestJson))
 	            .andExpect(status().isOk());
+	}
+	
+	@Test
+	public void controllerTest_WithEmptyName_ShouldReturnBadRequest() throws Exception{
+		mockMvc.perform(post("/test")
+				.contentType(MediaType.APPLICATION_JSON).content(emptyNameRequestJson))
+	            .andExpect(status().isBadRequest());
 	}
 }
